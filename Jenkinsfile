@@ -65,10 +65,13 @@ pipeline {
             }
             steps {
                 script {
+                    def registry = params.DOCKER_REGISTRY?.trim()
+                    if (!registry) {
+                        registry = 'ghcr.io/japvidal'
+                    }
+                    def imageName = 'tikitakas/competitions'
                     def imageTag = (env.BRANCH_NAME ?: "build-${env.BUILD_NUMBER}").replaceAll('[^A-Za-z0-9_.-]', '-')
-                    def imageRef = params.DOCKER_REGISTRY?.trim()
-                        ? "${params.DOCKER_REGISTRY}/${env.IMAGE_NAME}:${imageTag}"
-                        : "${env.IMAGE_NAME}:${imageTag}"
+                    def imageRef = "${registry}/${imageName}:${imageTag}"
                     env.IMAGE_TAG = imageTag
                     env.IMAGE_REF = imageRef
                     echo "IMAGE_REF=${env.IMAGE_REF}"
@@ -84,11 +87,13 @@ pipeline {
             steps {
                 script {
                     if (!env.IMAGE_REF?.trim()) {
+                        def registry = params.DOCKER_REGISTRY?.trim()
+                        if (!registry) {
+                            registry = 'ghcr.io/japvidal'
+                        }
                         def imageTag = (env.BRANCH_NAME ?: "build-${env.BUILD_NUMBER}").replaceAll('[^A-Za-z0-9_.-]', '-')
                         env.IMAGE_TAG = imageTag
-                        env.IMAGE_REF = params.DOCKER_REGISTRY?.trim()
-                            ? "${params.DOCKER_REGISTRY}/${env.IMAGE_NAME}:${imageTag}"
-                            : "${env.IMAGE_NAME}:${imageTag}"
+                        env.IMAGE_REF = "${registry}/tikitakas/competitions:${imageTag}"
                     }
                     if (params.DOCKER_CREDENTIALS_ID?.trim()) {
                         withCredentials([
