@@ -74,9 +74,9 @@ pipeline {
                     def imageRef = "${registry}/${imageName}:${imageTag}"
                     env.IMAGE_TAG = imageTag
                     env.IMAGE_REF = imageRef
-                    echo "IMAGE_REF=${env.IMAGE_REF}"
+                    echo "IMAGE_REF=${imageRef}"
                     writeFile file: '.docker-image-ref', text: "${imageRef}\n"
-                    sh "docker build -f Dockerfile -t ${env.IMAGE_REF} ."
+                    sh "docker build -f Dockerfile -t ${imageRef} ."
                 }
             }
         }
