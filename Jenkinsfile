@@ -75,6 +75,7 @@ pipeline {
                     env.IMAGE_TAG = imageTag
                     env.IMAGE_REF = imageRef
                     echo "IMAGE_REF=${env.IMAGE_REF}"
+                    writeFile file: '.docker-image-ref', text: "${imageRef}\n"
                     sh "docker build -f Dockerfile -t ${env.IMAGE_REF} ."
                 }
             }
@@ -86,13 +87,7 @@ pipeline {
             }
             steps {
                 script {
-                    def registry = params.DOCKER_REGISTRY?.trim()
-                    if (!registry) {
-                        registry = 'ghcr.io/japvidal'
-                    }
-                    def imageTag = (env.BRANCH_NAME ?: "build-${env.BUILD_NUMBER}").replaceAll('[^A-Za-z0-9_.-]', '-')
-                    def imageRef = "${registry}/tikitakas/competitions:${imageTag}"
-                    env.IMAGE_TAG = imageTag
+                    def imageRef = readFile('.docker-image-ref').trim()
                     env.IMAGE_REF = imageRef
                     echo "PUSH_IMAGE_REF=${imageRef}"
                     if (params.DOCKER_CREDENTIALS_ID?.trim()) {
@@ -105,8 +100,10 @@ pipeline {
                         ]) {
                             sh """
                                 set +x
-                                if [ -n "${registry}" ]; then
-                                  echo "\${DOCKER_PASSWORD}" | docker login "${registry}" -u "\${DOCKER_USERNAME}" --password-stdin
+                                if [ -n "${params.DOCKER_REGISTRY?.trim()}" ]; then
+                                  echo "\${DOCKER_PASSWORD}" | docker login "${params.DOCKER_REGISTRY?.trim()}" -u "\${DOCKER_USERNAME}" --password-stdin
+                                else
+                                  echo "\${DOCKER_PASSWORD}" | docker login ghcr.io/japvidal -u "\${DOCKER_USERNAME}" --password-stdin
                                 fi
                                 docker push "${imageRef}"
                             """
