@@ -64,7 +64,16 @@ pipeline {
                 expression { return params.BUILD_DOCKER }
             }
             steps {
-                sh 'docker build -f Dockerfile -t "${IMAGE_REF}" .'
+                script {
+                    def imageTag = (env.BRANCH_NAME ?: "build-${env.BUILD_NUMBER}").replaceAll('[^A-Za-z0-9_.-]', '-')
+                    def imageRef = params.DOCKER_REGISTRY?.trim()
+                        ? "${params.DOCKER_REGISTRY}/${env.IMAGE_NAME}:${imageTag}"
+                        : "${env.IMAGE_NAME}:${imageTag}"
+                    env.IMAGE_TAG = imageTag
+                    env.IMAGE_REF = imageRef
+                    echo "IMAGE_REF=${env.IMAGE_REF}"
+                    sh "docker build -f Dockerfile -t ${env.IMAGE_REF} ."
+                }
             }
         }
 
@@ -74,6 +83,13 @@ pipeline {
             }
             steps {
                 script {
+                    if (!env.IMAGE_REF?.trim()) {
+                        def imageTag = (env.BRANCH_NAME ?: "build-${env.BUILD_NUMBER}").replaceAll('[^A-Za-z0-9_.-]', '-')
+                        env.IMAGE_TAG = imageTag
+                        env.IMAGE_REF = params.DOCKER_REGISTRY?.trim()
+                            ? "${params.DOCKER_REGISTRY}/${env.IMAGE_NAME}:${imageTag}"
+                            : "${env.IMAGE_NAME}:${imageTag}"
+                    }
                     if (params.DOCKER_CREDENTIALS_ID?.trim()) {
                         withCredentials([
                             usernamePassword(
