@@ -63,23 +63,8 @@ pipeline {
         stage('Detect Dockerfile') {
             steps {
                 script {
-                    sh 'pwd'
-                    sh 'ls -la'
-                    sh 'git ls-files'
-
-                    echo "BUILD_DOCKER=${params.BUILD_DOCKER}"
-                    echo "PUSH_DOCKER=${params.PUSH_DOCKER}"
-
-                    if (fileExists('Dockerfile')) {
-                        env.DOCKERFILE_PATH = 'Dockerfile'
-                    } else {
-                        env.DOCKERFILE_PATH = sh(
-                            script: 'ls *.Dockerfile 2>/dev/null | head -n 1 || true',
-                            returnStdout: true
-                        ).trim()
-                    }
-
-                    echo "A DOCKERFILE_PATH=${env.DOCKERFILE_PATH}"
+                    env.DOCKERFILE_PATH = 'Dockerfile'
+                    echo "DOCKERFILE_PATH=${env.DOCKERFILE_PATH}"
                 }
             }
         }
