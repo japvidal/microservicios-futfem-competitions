@@ -86,15 +86,15 @@ pipeline {
             }
             steps {
                 script {
-                    if (!env.IMAGE_REF?.trim()) {
-                        def registry = params.DOCKER_REGISTRY?.trim()
-                        if (!registry) {
-                            registry = 'ghcr.io/japvidal'
-                        }
-                        def imageTag = (env.BRANCH_NAME ?: "build-${env.BUILD_NUMBER}").replaceAll('[^A-Za-z0-9_.-]', '-')
-                        env.IMAGE_TAG = imageTag
-                        env.IMAGE_REF = "${registry}/tikitakas/competitions:${imageTag}"
+                    def registry = params.DOCKER_REGISTRY?.trim()
+                    if (!registry) {
+                        registry = 'ghcr.io/japvidal'
                     }
+                    def imageTag = (env.BRANCH_NAME ?: "build-${env.BUILD_NUMBER}").replaceAll('[^A-Za-z0-9_.-]', '-')
+                    def imageRef = "${registry}/tikitakas/competitions:${imageTag}"
+                    env.IMAGE_TAG = imageTag
+                    env.IMAGE_REF = imageRef
+                    echo "PUSH_IMAGE_REF=${imageRef}"
                     if (params.DOCKER_CREDENTIALS_ID?.trim()) {
                         withCredentials([
                             usernamePassword(
@@ -103,16 +103,16 @@ pipeline {
                                 passwordVariable: 'DOCKER_PASSWORD'
                             )
                         ]) {
-                            sh '''
+                            sh """
                                 set +x
-                                if [ -n "${DOCKER_REGISTRY}" ]; then
-                                  echo "${DOCKER_PASSWORD}" | docker login "${DOCKER_REGISTRY}" -u "${DOCKER_USERNAME}" --password-stdin
+                                if [ -n "${registry}" ]; then
+                                  echo "\${DOCKER_PASSWORD}" | docker login "${registry}" -u "\${DOCKER_USERNAME}" --password-stdin
                                 fi
-                                docker push "${IMAGE_REF}"
-                            '''
+                                docker push "${imageRef}"
+                            """
                         }
                     } else {
-                        sh 'docker push "${IMAGE_REF}"'
+                        sh "docker push ${imageRef}"
                     }
                 }
             }
