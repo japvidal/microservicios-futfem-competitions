@@ -63,6 +63,11 @@ pipeline {
         stage('Detect Dockerfile') {
             steps {
                 script {
+                    sh 'pwd'
+                    sh 'ls -la'
+                    echo "BUILD_DOCKER=${params.BUILD_DOCKER}"
+                    echo "PUSH_DOCKER=${params.PUSH_DOCKER}"
+
                     if (fileExists('Dockerfile')) {
                         env.DOCKERFILE_PATH = 'Dockerfile'
                     } else {
@@ -71,6 +76,8 @@ pipeline {
                             returnStdout: true
                         ).trim()
                     }
+
+                    echo "DOCKERFILE_PATH=${env.DOCKERFILE_PATH}"
                 }
             }
         }
