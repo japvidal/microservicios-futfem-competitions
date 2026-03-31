@@ -15,7 +15,6 @@ pipeline {
     }
 
     environment {
-        DOCKERFILE_PATH = ''
         IMAGE_NAME = 'tikitakas/competitions'
         IMAGE_TAG = ''
         IMAGE_REF = ''
@@ -60,27 +59,18 @@ pipeline {
             }
         }
 
-        stage('Detect Dockerfile') {
-            steps {
-                script {
-                    env.DOCKERFILE_PATH = 'Dockerfile'
-                    echo "DOCKERFILE_PATH=${env.DOCKERFILE_PATH}"
-                }
-            }
-        }
-
         stage('Build Docker Image') {
             when {
-                expression { return params.BUILD_DOCKER && env.DOCKERFILE_PATH?.trim() }
+                expression { return params.BUILD_DOCKER }
             }
             steps {
-                sh "docker build -f ${env.DOCKERFILE_PATH} -t ${env.IMAGE_REF} ."
+                sh 'docker build -f Dockerfile -t "${IMAGE_REF}" .'
             }
         }
 
         stage('Push Docker Image') {
             when {
-                expression { return params.BUILD_DOCKER && params.PUSH_DOCKER && env.DOCKERFILE_PATH?.trim() }
+                expression { return params.BUILD_DOCKER && params.PUSH_DOCKER }
             }
             steps {
                 script {
