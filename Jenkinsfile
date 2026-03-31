@@ -65,6 +65,8 @@ pipeline {
                 script {
                     sh 'pwd'
                     sh 'ls -la'
+                    sh 'git ls-files'
+
                     echo "BUILD_DOCKER=${params.BUILD_DOCKER}"
                     echo "PUSH_DOCKER=${params.PUSH_DOCKER}"
 
