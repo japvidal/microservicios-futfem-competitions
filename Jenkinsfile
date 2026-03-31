@@ -79,7 +79,7 @@ pipeline {
                         ).trim()
                     }
 
-                    echo "DOCKERFILE_PATH=${env.DOCKERFILE_PATH}"
+                    echo "A DOCKERFILE_PATH=${env.DOCKERFILE_PATH}"
                 }
             }
         }
