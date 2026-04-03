@@ -6,7 +6,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest(classes = MicroserviciosFutfemCompetitionsApplication.class)
 @ActiveProfiles("test")
-class MicroserviciosUsuariosApplicationTests {
+class MicroserviciosFutfemCompetitionsApplicationTests {
 
     @Test
     void contextLoads() {
